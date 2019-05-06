@@ -20,14 +20,16 @@ Agents have an organization which enables having multiple agents per organizatio
 # SMF Implementation specification
 In the context of food supply chain, from master data to transactional data there are requirements to enforce permissions for partners to be competitive. 
 
-# Potential Data Model
-![Alt text](https://github.com/JMIsham/sawtooth-sabre-smartcontract/blob/master/Rzr%20Bck%20-%20Data%20Model.png)
-
 ## Required Technical Capability
-* Enforcing updates/deletes only to the 'owner' of the master-data
-* Private transactions only readable to a set of partners
+* Enforcing updates/deletes only to the 'owner' of the data
+    * PIKE organizations and Agents in the PIKE namespace can be used for this, ideally when a product is created product  should have the owner field which refers to the organization that the product belongs to.
+    * Organizations/Agents are stored as company metadata in the PIKE namespace
+    * Updates/deletes are restricted only to the Agents acting behalf of the organization referred in the owner field of the product.
+* Private transactions should only be accessible to a set of partners
     * Sharing product catalogues only between a set of partners
     * Transactional data should only be accessed by relevant parties
 
+# Potential Data Model
+![Alt text](https://github.com/JMIsham/sawtooth-sabre-smartcontract/blob/master/Rzr%20Bck%20-%20Data%20Model.png)
 
 # Open Questions 
