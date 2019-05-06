@@ -2,8 +2,8 @@ syntax = "proto3";
 
 message ProgramPayload {
     enum Action {
-        CREATE_PROGRAM = 1;
-        UPDATE_ORG_STATUS = 2;
+        CREATE_PROGRAM = 0;
+        UPDATE_ORG_STATUS = 1;
     }
     Action action = 1;
 
