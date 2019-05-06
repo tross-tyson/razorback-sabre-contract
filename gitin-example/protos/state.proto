@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-message PROGRAM {
+message Program {
   string gitin = 1;
   repeated OrgStatus metadata = 5;
 }
