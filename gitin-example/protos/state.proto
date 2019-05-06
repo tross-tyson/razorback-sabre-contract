@@ -1,5 +1,9 @@
 syntax = "proto3";
 
+message ProgramList{
+  repeated Program programs = 1;
+}
+
 message Program {
   string gitin = 1;
   repeated OrgStatus metadata = 5;
