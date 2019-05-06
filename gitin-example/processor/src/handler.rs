@@ -1,20 +1,33 @@
 
-use self::sabre_sdk::TransactionContext;
-use self::sabre_sdk::ApplyError;
-use self::sabre_sdk::TransactionHandler;
-use self::sabre_sdk::TpProcessRequest;
-use self::sabre_sdk::{WasmPtr, execute_entrypoint};
+use protobuf;
+use crypto::digest::Digest;
+use crypto::sha2::Sha512;
+
+cfg_if! {
+    if #[cfg(target_arch = "wasm32")] {
+        use sabre_sdk::ApplyError;
+        use sabre_sdk::TransactionContext;
+        use sabre_sdk::TransactionHandler;
+        use sabre_sdk::TpProcessRequest;
+        use sabre_sdk::{WasmPtr, execute_entrypoint};
+    } else {
+        use sawtooth_sdk::processor::handler::ApplyError;
+        use sawtooth_sdk::processor::handler::TransactionContext;
+        use sawtooth_sdk::processor::handler::TransactionHandler;
+        use sawtooth_sdk::messages::processor::TpProcessRequest;
+    }
+}
 
 
-const NAMESPACE: &`static str = "123456";
+const NAMESPACE: &'static str = "123456";
 
 pub struct ProgramTransactionHandler {
     family_name: String,
     family_versions: Vec<String>,
-    namespaces: vec<String>,
+    namespaces: Vec<String>,
 }
 
-pub impl ProgramTransactionHandler {
+impl ProgramTransactionHandler {
     pub fn new() -> ProgramTransactionHandler {
         ProgramTransactionHandler {
             family_name : "program".to_string(),
@@ -24,15 +37,15 @@ pub impl ProgramTransactionHandler {
     }
 }
 
-pub impl TransactionHandler for ProgramTransactionHandler {
+impl TransactionHandler for ProgramTransactionHandler {
     fn family_name (&self) -> String {
         return self.family_name.clone();
     }
 
-    fn namespaces (&self) -> String {
+    fn namespaces (&self) -> Vec<String> {
         return self.namespaces.clone();
     }
-    fn family_versions (&self) -> String {
+    fn family_versions (&self) -> Vec<String> {
         return self.family_versions.clone();
     }
 
@@ -41,7 +54,7 @@ pub impl TransactionHandler for ProgramTransactionHandler {
         request: &TpProcessRequest,
         context: &mut dyn TransactionContext, 
     ) -> Result<(), ApplyError> {
-
+        Ok(())
     }
 }
 // Sabre apply must return a bool
