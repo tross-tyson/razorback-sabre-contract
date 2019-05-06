@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+message ProgramPayload {
+    enum Action {
+        CREATE_PROGRAM = 1;
+        UPDATE_ORG_STATUS = 2;
+    }
+    Action action = 1;
+
+}
+
+message CreateProgramAction {
+    string gitin = 1;
+}
+message UpdateOrgStatus {
+    string gitin = 1;
+    string org_name = 2;
+    string status = 3;
+
+}
