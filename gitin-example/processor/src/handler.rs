@@ -17,7 +17,7 @@ cfg_if! {
     }
 }
 
-use protos::payload::{CreateProgramAction, UpdateOrgStatus};
+use protos::payload::{CreateProgramAction, UpdateOrgStatus, ProgramPayload, ProgramPayload_Action as Action};
 use protos::state::{ProgramList, Program, OrgStatus};
 
 
@@ -149,7 +149,23 @@ impl TransactionHandler for ProgramTransactionHandler {
         request: &TpProcessRequest,
         context: &mut dyn TransactionContext, 
     ) -> Result<(), ApplyError> {
-        Ok(())
+        let payload = protobuf::parse_from_bytes::<ProgramPayload>(request.get_payload())
+            .map_err(|_| ApplyError::InternalError("Failed to parse payload".into()))?;
+        let mut state = ProgramState::new(context);
+        #[cfg(not(target_arch = "wasm32"))]
+        info!(
+            "{:?} {:?} {:?}",
+            payload.get_action(),
+            request.get_header().get_inputs(),
+            request.get_header().get_outputs()
+        );
+
+        match payload.action {
+            Action::CREATE_PROGRAM => create_program(payload.get_create_program(), &mut state),
+            Action::UPDATE_ORG_STATUS => update_org_state(payload.get_update_org_status(), &mut state),
+            _ => Err(ApplyError::InvalidTransaction("Invalid action".into())),
+        }
+
     }
 }
 
