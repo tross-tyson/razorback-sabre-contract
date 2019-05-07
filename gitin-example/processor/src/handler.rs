@@ -1,4 +1,3 @@
-
 use protobuf;
 use crypto::digest::Digest;
 use crypto::sha2::Sha512;
@@ -18,8 +17,104 @@ cfg_if! {
     }
 }
 
+use protos::payload::{CreateProgramAction, UpdateOrgStatus};
+use protos::state::{ProgramList, Program, OrgStatus};
+
 
 const NAMESPACE: &'static str = "123456";
+
+
+fn compute_address(gitin: &str) -> String {
+    let mut sha = Sha512::new();
+    sha.input(gitin.as_bytes());
+    String::from(NAMESPACE) + &sha.result_str()[..64].to_string()
+}
+
+pub struct ProgramState<'a> {
+    context : &'a mut TransactionContext,
+}
+
+impl <'a> ProgramState<'a> {
+    pub fn new(context: &'a mut TransactionContext) -> ProgramState {
+        ProgramState { context: context }
+    }
+    pub fn get_program(&mut self, gitin : &str) -> Result <Option<Program>, ApplyError> {
+        let address = compute_address(gitin);
+        let d = self.context.get_state_entry(&address)?;
+        match d {
+            Some(packed) => {
+                let progs: ProgramList = match protobuf::parse_from_bytes(packed.as_slice()) {
+                    Ok(progs) => progs,
+                    Err(err) => {
+                        return Err(ApplyError::InternalError(format!(
+                            "Cannot deserialize Program list: {:?}",
+                            err,
+                        )))
+                    } 
+                };
+                for prog in progs.get_programs() {
+                    if prog.gitin == gitin {
+                        return Ok(Some(prog.clone()));
+                    }
+                }
+                Ok (None)
+            }
+            None => Ok(None),
+        }
+    }
+    pub fn set_program(&mut self, gitin: &str, new_program: Program) -> Result<(), ApplyError> {
+        let address = compute_address(gitin);
+        let d = self.context.get_state_entry(&address);
+        let mut program_list = match d {
+            Ok(Some(packed)) => match protobuf::parse_from_bytes(packed.as_slice()) {
+                Ok(progs) => progs,
+                Err(err) =>{
+                return Err(ApplyError::InternalError(String::from(
+                    "Cannot decode the program list",
+                )))
+            }
+            },
+            Ok(None) => ProgramList::new(),
+            Err(err) =>{
+                return Err(ApplyError::InternalError(String::from(
+                    "Cannot decode the program list",
+                )))
+            }
+        };
+
+        let programs = program_list.get_programs().to_vec();
+        let mut index = None;
+        let mut count = 0;
+        for program in programs.clone() {
+            if program.gitin == gitin {
+               index = Some(count);
+                break;
+            }
+            count = count + 1;
+        }
+
+        match index {
+            Some(x) => {
+                program_list.programs.remove(x);
+            }
+            None => (),
+        };
+        program_list.programs.push(new_program);
+        let serialized = match protobuf::Message::write_to_bytes(&program_list) {
+            Ok(serialized) => serialized,
+            Err(_) => {
+                return Err(ApplyError::InternalError(String::from(
+                    "Cannot serialize program list",
+                )))
+            }
+        };
+        self.context
+            .set_state_entry(address, serialized)
+            .map_err(|err| ApplyError::InternalError(format!("{}", err)))?;
+        Ok(())
+    }
+}
+
 
 pub struct ProgramTransactionHandler {
     family_name: String,
@@ -57,13 +152,85 @@ impl TransactionHandler for ProgramTransactionHandler {
         Ok(())
     }
 }
+
+fn create_program(
+    payload: &CreateProgramAction,
+    state: &mut ProgramState
+) -> Result<(), ApplyError> {
+    match state.get_program(payload.get_gitin()) {
+        Ok(None) => (),
+        Ok(Some(_)) => {
+            return Err(ApplyError::InvalidTransaction(format!(
+                "Program already exists: {}",
+                payload.get_gitin(),
+            )))
+        }
+        Err(err) => {
+            return Err(ApplyError::InvalidTransaction(format!(
+                "Failed to retrieve state: {}",
+                err,
+            )))
+        }
+    }  
+    let mut program = Program::new();
+    program.set_gitin(payload.get_gitin().to_string());
+    state
+        .set_program(payload.get_gitin(), program)
+        .map_err(|e| ApplyError::InternalError(format!("Failed to create program: {:?}",e)))
+}
+
+fn update_org_state(
+    payload: &UpdateOrgStatus,
+    state: &mut ProgramState
+) -> Result<(), ApplyError> {
+    let mut program = match state.get_program(payload.get_gitin()){
+        Ok(None) => {
+            return Err(ApplyError:: InvalidTransaction(format!(
+                "Program does not exists : {}", 
+                payload.get_gitin(),
+            )))
+        }
+        Ok (Some(program)) => program,
+        Err(err) => {
+            return Err(ApplyError::InvalidTransaction(format!(
+                "Failed to retrieve state: {}",
+                err,
+            )))
+        }
+    };
+    let statuses = program.get_org_status().to_vec();
+    let mut index = None;
+    let mut count = 0;
+    for status in statuses.clone() {
+        if status.get_org_name() == payload.get_org_status().clone().get_org_name() {
+            index = Some(count);
+            break;
+        }
+        count = count + 1;
+    }
+
+    match index {
+        Some(x) => {
+            program.org_status.remove(x);
+        }
+        None => (),
+    };
+    program.org_status.push(payload.get_org_status().clone());
+    state
+        .set_program(payload.get_gitin(), program)
+        .map_err(|e| ApplyError::InternalError(format!("Failed to update the program: {:?}",e)))
+
+}
+
 // Sabre apply must return a bool
+#[cfg(target_arch = "wasm32")]
 fn apply(
     request: &TpProcessRequest,
     context: &mut dyn TransactionContext,
 ) -> Result<bool, ApplyError> {
     Ok(true)    
 }
+#[cfg(target_arch = "wasm32")]
 #[no_mangle]
 pub unsafe fn entrypoint(payload: WasmPtr, signer: WasmPtr, signature: WasmPtr) -> i32 {
     execute_entrypoint(payload, signer, signature, apply)
