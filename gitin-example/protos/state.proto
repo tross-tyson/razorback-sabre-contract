@@ -6,7 +6,7 @@ message ProgramList{
 
 message Program {
   string gitin = 1;
-  repeated OrgStatus metadata = 5;
+  repeated OrgStatus org_status = 2;
 }
 
 message OrgStatus {
