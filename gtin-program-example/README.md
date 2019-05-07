@@ -1,20 +1,21 @@
-#GTIN program example 
+# GTIN program example 
 This is an ongaoing project for building a sample agreement program between consourtiom organizations. An organization can issue a document and other organizations can set their status about the document. In this initial phase an organization will issue a GTIN and other organizations can update their status. The current functionality only supports publishing a GTIN and we are working on the update_org_state functionality. 
 
-###Build the payload
+### Build the payload
 `cd payload`
 `cargo build`
 `./target/debug/payload`
 
-###Build the WASM smart contract
+### Build the WASM smart contract
 `cd process`
+
 `cargo build --target wasm32-unknown-unknown --release`
 
-###Set the currect path for wasm in the gtin.yaml file
+### Set the currect path for wasm in the gtin.yaml file
 
-##Ruinning the sabre smart contract
-###Make sure you have the latest sabre tp and cli from the built and installed from the master branch of the sabre git repo and ###the admin key is set properly in the sawtooth settings
-###Running the example
+## Ruinning the sabre smart contract
+### Make sure you have the latest sabre tp and cli from the built and installed from the master branch of the sabre git repo and the admin key is set properly in the sawtooth settings
+### Running the example
 ```
 sabre cr --create gitin_example --owner 03e2b277454209d4e358a3cc2df167af859c06807ac67378e5e2807cbf84904ed9 --url http://127.0.0.1:8008
 sabre upload --filename /home/ubuntu/gitin-example/gitin.yaml  --url http://127.0.0.1:8008 
