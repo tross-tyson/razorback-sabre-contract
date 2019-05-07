@@ -1,7 +1,0 @@
-name: gitin_example
-version: '1.0'
-wasm: processor/target/wasm32-unknown-unknown/release/gitin_example.wasm
-inputs:
-  - '123456'
-outputs:
-  - '123456'
