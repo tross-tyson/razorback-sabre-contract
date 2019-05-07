@@ -2,8 +2,11 @@
 This is an ongaoing project for building a sample agreement program between consourtiom organizations. An organization can issue a document and other organizations can set their status about the document. In this initial phase an organization will issue a GTIN and other organizations can update their status. The current functionality only supports publishing a GTIN and we are working on the update_org_state functionality. 
 
 ### Build the payload
+
 `cd payload`
+
 `cargo build`
+
 `./target/debug/payload`
 
 ### Build the WASM smart contract
