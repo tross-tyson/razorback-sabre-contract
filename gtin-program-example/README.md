@@ -17,7 +17,10 @@ This is an ongaoing project for building a sample agreement program between cons
 ##### Set the currect path for wasm in the gtin.yaml file
 
 ## Ruinning the sabre smart contract
-### Make sure you have the latest sabre tp and cli from the built and installed from the master branch of the sabre git repo and the admin key is set properly in the sawtooth settings
+### Make sure
+-The latest sabre tp and cli built and installed from the master branch of the sabre git repo
+
+-Admin key is set properly in the sawtooth settings
 ### Running the example
 ```
 sabre cr --create gitin_example --owner {admin public key} --url http://127.0.0.1:8008
