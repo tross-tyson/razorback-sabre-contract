@@ -1,0 +1,10 @@
+language: rust
+dist: xenial
+install:
+- rustup update
+- rustup default nightly
+- rustup target add wasm32-unknown-unknown --toolchain nightly
+script:
+- cargo build --manifest-path razorback_boilerplate/processor/Cargo.toml --target
+  wasm32-unknown-unknown --release
+before_deploy: "cd razorback_boilerplate/processor/"
