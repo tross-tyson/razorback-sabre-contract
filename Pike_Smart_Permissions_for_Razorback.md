@@ -5,7 +5,7 @@ SPFs are non other that business logic that encapsulates logic for enforcing per
 Overall view on SMF: https://sawtooth.hyperledger.org/docs/sabre/nightly/master/smart_permissions.html
 
 # How do SMFs work ?
-Similar to Sabre Contracts, Smart Permission Functions can be developed and converted byte codes (.wasm) files can be saved in the 'state' - on chain. 
+Similar to Sabre Contracts, Smart Permission Functions can be developed and converted to byte codes (.wasm) files that can be saved in the 'state' - on chain. 
 
 Boilerplate code for SMF : https://github.com/hyperledger/sawtooth-sabre/tree/master/contracts/sawtooth-pike/examples
 
@@ -31,5 +31,7 @@ In the context of food supply chain, from master data to transactional data ther
 
 # Potential Data Model
 ![Alt text](https://github.com/JMIsham/sawtooth-sabre-smartcontract/blob/master/Rzr%20Bck%20-%20Data%20Model.png)
+
+
 
 # Open Questions 
