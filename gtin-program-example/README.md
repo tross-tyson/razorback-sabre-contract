@@ -11,7 +11,7 @@ This is an ongaoing project for building a sample agreement program between cons
 
 `cargo build --target wasm32-unknown-unknown --release`
 
-### Set the currect path for wasm in the gtin.yaml file
+##### Set the currect path for wasm in the gtin.yaml file
 
 ## Ruinning the sabre smart contract
 ### Make sure you have the latest sabre tp and cli from the built and installed from the master branch of the sabre git repo and the admin key is set properly in the sawtooth settings
