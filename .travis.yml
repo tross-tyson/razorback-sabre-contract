@@ -7,4 +7,3 @@ install:
 script:
 - cargo build --manifest-path razorback_boilerplate/processor/Cargo.toml --target
   wasm32-unknown-unknown --release
-before_deploy: "cd razorback_boilerplate/processor/"
