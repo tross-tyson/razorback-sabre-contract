@@ -17,10 +17,10 @@ This is an ongaoing project for building a sample agreement program between cons
 ### Make sure you have the latest sabre tp and cli from the built and installed from the master branch of the sabre git repo and the admin key is set properly in the sawtooth settings
 ### Running the example
 ```
-sabre cr --create gitin_example --owner 03e2b277454209d4e358a3cc2df167af859c06807ac67378e5e2807cbf84904ed9 --url http://127.0.0.1:8008
+sabre cr --create gitin_example --owner {admin public key} --url http://127.0.0.1:8008
 sabre upload --filename /home/ubuntu/gitin-example/gitin.yaml  --url http://127.0.0.1:8008 
 
-sabre ns --create 123456 --owner 03e2b277454209d4e358a3cc2df167af859c06807ac67378e5e2807cbf84904ed9 --url http://127.0.0.1:8008
+sabre ns --create 123456 --owner {admin public key} --url http://127.0.0.1:8008
 sabre perm  123456 gitin_example --read --write --url http://127.0.0.1:8008
 
 sawtooth block list
