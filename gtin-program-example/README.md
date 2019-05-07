@@ -23,15 +23,15 @@ This is an on going project for building a sample agreement program between cons
 -Admin key is set properly in the sawtooth settings
 ### Running the example
 ```
-sabre cr --create gitin_example --owner {admin public key} --url http://127.0.0.1:8008
-sabre upload --filename /home/ubuntu/gitin-example/gitin.yaml  --url http://127.0.0.1:8008 
+sabre cr --create gtin_example --owner {admin public key} --url http://127.0.0.1:8008
+sabre upload --filename /home/ubuntu/gitin-example/gtin.yaml  --url http://127.0.0.1:8008 
 
 sabre ns --create 123456 --owner {admin public key} --url http://127.0.0.1:8008
-sabre perm  123456 gitin_example --read --write --url http://127.0.0.1:8008
+sabre perm  123456 gtin_example --read --write --url http://127.0.0.1:8008
 
 sawtooth block list
 
-sabre exec --contract gitin_example:1.0 --payload /home/ubuntu/gitin-example/payload/payload --inputs  123456 --outputs  123456 --url http://127.0.0.1:8008
+sabre exec --contract gtin_example:1.0 --payload /home/ubuntu/gitin-example/payload/payload --inputs  123456 --outputs  123456 --url http://127.0.0.1:8008
 
 sawtooth block list
 
