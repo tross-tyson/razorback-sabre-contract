@@ -16,7 +16,7 @@ fn main() -> std::io::Result<()>{
 
 fn create_program_payload() -> ProgramPayload{
     let mut create_program = CreateProgramAction::new();
-    create_program.set_gtin("12345678".to_string());
+    create_program.set_gtin("00049000015966".to_string());
     let mut payload = ProgramPayload::new();
     payload.action = ProgramPayload_Action::CREATE_PROGRAM;
     payload.set_create_program(create_program);
