@@ -21,7 +21,7 @@ use protos::payload::{CreateProgramAction, UpdateOrgStatus, ProgramPayload, Prog
 use protos::state::{ProgramList, Program, OrgStatus};
 
 
-const NAMESPACE: &'static str = "123456";
+const NAMESPACE: &'static str = "000001";
 
 
 fn compute_address(gtin: &str) -> String {
@@ -125,7 +125,7 @@ pub struct ProgramTransactionHandler {
 impl ProgramTransactionHandler {
     pub fn new() -> ProgramTransactionHandler {
         ProgramTransactionHandler {
-            family_name : "program".to_string(),
+            family_name : "gtin_example".to_string(),
             family_versions : vec!["0.1".to_string()],
             namespaces : vec![NAMESPACE.to_string()],
         }
@@ -244,7 +244,11 @@ fn apply(
     request: &TpProcessRequest,
     context: &mut dyn TransactionContext,
 ) -> Result<bool, ApplyError> {
-    Ok(true)    
+    let handler = ProgramTransactionHandler::new();
+    match handler.apply(request, context) {
+        Ok(_) => Ok(true),
+        Err(err) => Err(err),
+    }   
 }
 #[cfg(target_arch = "wasm32")]
 #[no_mangle]
