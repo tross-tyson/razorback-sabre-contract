@@ -1,7 +1,6 @@
 [package]
-name = "pike-cli"
+name = "gtin"
 version = "0.1.0"
-authors = ["Cargill"]
 build = "build.rs"
 
 [dependencies]
@@ -13,6 +12,8 @@ hyper = "0.11"
 tokio-core = "0.1"
 tokio-timer = "0.1"
 users = "0.6"
+http = "0.1"
+json = "0.1"
 
 [build-dependencies]
 protoc-rust = "2"
