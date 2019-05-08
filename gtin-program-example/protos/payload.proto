@@ -1,0 +1,23 @@
+syntax = "proto3";
+import "state.proto";
+
+message ProgramPayload {
+    enum Action {
+        ACTION_UNSET = 0;
+
+        CREATE_PROGRAM = 1;
+        UPDATE_ORG_STATUS = 2;
+    }
+    Action action = 1;
+
+    CreateProgramAction create_program = 2;
+    UpdateOrgStatus update_org_status = 3;
+}
+
+message CreateProgramAction {
+    string gtin = 1;
+}
+message UpdateOrgStatus {
+    string gtin = 1;
+    OrgStatus org_status = 2;
+}
