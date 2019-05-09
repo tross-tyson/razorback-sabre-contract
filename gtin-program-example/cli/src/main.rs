@@ -2,12 +2,11 @@
 extern crate clap;
 extern crate crypto;
 extern crate protobuf;
-extern crate users;
-extern crate http;
 extern crate hyper;
 extern crate futures;
 extern crate tokio_core;
 extern crate json;
+extern crate base64;
 
 
 mod error;
@@ -19,7 +18,10 @@ use hyper::client::{Request, Client};
 use tokio_core::reactor::Core;
 use futures::Stream;
 use json::parse;
+// use rustc_serialize::json;
+mod protos;
 
+use protos::state::{ProgramList};
 use crypto::digest::Digest;
 use crypto::sha2::Sha512;
 
@@ -29,11 +31,9 @@ const NAMESPACE: &'static str = "000001";
 
 fn compute_address(gtin: &str) -> String {
     let mut sha = Sha512::new();
-    println!("{}",gtin.to_string());
     sha.input(gtin.as_bytes());
     String::from(NAMESPACE) + &sha.result_str()[..64].to_string()
 }
-
 
 fn run() -> Result<(), CliError> {
     let matches = clap_app!(myapp =>
@@ -55,15 +55,13 @@ fn run() -> Result<(), CliError> {
             let gtin = match matches.value_of("gtin"){
                 Some(x) => x,
                 None =>{
-                    return Err(CliError::UserError(format!("gtin is required")))
+                    return Err(CliError::UserError(format!("gtin is required0")))
                 }
             };
 
             let base = "http://127.0.0.1:8008/state/".to_string();
             let address = compute_address(gtin);
             let strurl = base+&address;
-            println!("{}",strurl);
-
             let mut core = Core::new().unwrap();
 
             let client = Client::new(&core.handle());
@@ -83,18 +81,28 @@ fn run() -> Result<(), CliError> {
             });
 
             let body = core.run(work)?;
-            let body2 = body.to_string();
-            println!("Response Body:\n{}", &body2);
             let parsed =parse(&body).unwrap();
             let mut body3 = match parsed.get("data"){
-                Ok(x) => x,
+                Ok(json::JsonValue::String(x)) => x,
+                Ok(x) => "None",
                 Err(err) => {
-                    return Err(CliError::UserError(format!("gtin is required")))
+                    return Ok(())
                 }
             };
-            println!("{:?}", body4.as_string().to_string());
-            }
             
+            let decoded = base64::decode(body3).unwrap();
+            let progs: ProgramList = match protobuf::parse_from_bytes(decoded.as_bytes()) {
+                    Ok(progs) => progs,
+                    Err(err) => {
+                        return Err(CliError::UserError(format!("Unable to decode")))
+                    } 
+                };
+                for prog in progs.get_programs() {
+                    if prog.gtin == gtin {
+                        println!("{:?}", prog);
+                    }
+                }
+            }
         }
     Ok(())
 }
