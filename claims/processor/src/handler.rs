@@ -2,8 +2,7 @@ use protobuf;
 use crypto::digest::Digest;
 use crypto::sha2::Sha512;
 
-use protos::agreement::{Agreement, AgreementStatus, AgreementStatus_Status as Status};
-use protos::agreement_registry::{AgreementRegistryList, AgreementRegistry};
+use protos::agreement::{Agreement, AgreementStatus, AgreementStatus_Status, AgreementList};
 use protos::payload::{CreateAgreement, UpdateOrgStatus, AgreementPayload, AgreementPayload_Action as Action};
 
 
@@ -25,6 +24,135 @@ cfg_if! {
 
 const AGREEMENT_NAMESPACE: &'static str = "000004";
 
+fn compute_agreement_address(name: &str) -> String {
+    let mut sha = Sha512::new();
+    sha.input(name.as_bytes());
+    String::from(AGREEMENT_NAMESPACE) + &sha.result_str()[..64].to_string()
+}
+
+pub struct AgreementState<'a> {
+    context : &'a mut TransactionContext,
+}
+
+impl <'a> AgreementState<'a> {
+    pub fn new(context: &'a mut TransactionContext) -> AgreementState {
+        AgreementState { context: context }
+    }
+    pub fn get_agreement(&mut self, name : &str) -> Result <Option<Agreement>, ApplyError> {
+        let address = compute_agreement_address(name);
+        let a = self.context.get_state_entry(&address)?;
+        match a {
+            Some(packed) => {
+                let agreements: AgreementList = match protobuf::parse_from_bytes(packed.as_slice()) {
+                    Ok(agreements) => agreements,
+                    Err(err) => {
+                        return Err(ApplyError::InternalError(format!(
+                            "Cannot deserialize agreement list: {:?}",
+                            err,
+                        )))
+                    } 
+                };
+                for agreement in agreements.get_agreements() {
+                    if agreement.name == name {
+                        return Ok(Some(agreement.clone()));
+                    }
+                }
+                Ok (None)
+            }
+            None => Ok(None),?:?
+        }
+    }
+    pub fn set_agreement(&mut self, name: &str, new_agreement: Agreement) -> Result<(), ApplyError> {
+        let address = compute_agreement_address(gtin);
+        let d = self.context.get_state_entry(&address);
+        let mut agreementList = match d {
+            Ok(Some(packed)) => match protobuf::parse_from_bytes(packed.as_slice()) {
+                Ok(agreements) => agreements,
+                Err(err) =>{
+                return Err(ApplyError::InternalError(String::from(
+                    "Cannot decode the agreement list",
+                )))
+            }
+            },
+            Ok(None) => AgreemenmtList::new(),
+            Err(err) =>{
+                return Err(ApplyError::InternalError(String::from(
+                    "Cannot decode the agreement list",
+                )))
+            }
+        };
+
+        let agreements = agreement_list.get_agreements().to_vec();
+        let mut index = None;
+        let mut count = 0;
+        for agree in agreements.clone() {
+            if agree.name == name {
+               index = Some(count);
+                break;
+            }
+            count = count + 1;
+        }
+
+        match index {
+            Some(x) => {
+                agreement_list.agreements.remove(x);
+            }
+            None => (),
+        };
+        agreement_list.agreements.push(new_agreement);
+        let serialized = match protobuf::Message::write_to_bytes(&agreement_list) {
+            Ok(serialized) => serialized,
+            Err(_) => {
+                return Err(ApplyError::InternalError(String::from(
+                    "Cannot serialize agreement list",
+                )))
+            }
+        };
+        self.context
+            .set_state_entry(address, serialized)
+            .map_err(|err| ApplyError::InternalError(format!("{}", err)))?;
+        Ok(())
+    }
+}
+
+fn create_agreement(
+    payload: &CreateAgreementAction,
+    state: &mut AgreementState
+) -> Result<(), ApplyError> {
+    match state.get_agreement(payload.get_name()) {
+        Ok(None) => (),
+        Ok(Some(_)) => {
+            return Err(ApplyError::InvalidTransaction(format!(
+                "Agreement already exists: {}",
+                payload.get_gtin(),
+            )))
+        }
+        Err(err) => {
+            return Err(ApplyError::InvalidTransaction(format!(
+                "Failed to retrieve state: {}",
+                err,
+            )))
+        }
+    }  
+    let mut agreement = Agreement::new();
+    agreement.set_name(payload.get_name().to_string());
+    agreement.set_gtin(payload.get_gtin().to_string());
+    agreement.set_price(payload.get_price().to_string());
+    agreement.set_effectiveDate(payload.get_effectiveDate().to_string());
+    agreement.set_terminationDate(payload.get_erminationDate().to_string());
+    agreement.set_unitOfQuantity(payload.get_unitOfQuantity().to_string());
+    agreement.set_paymentTerm(payload.get_paymentTerm().to_string());
+    agreement.set_originParty(payload.get_originParty().to_string());
+
+    let mut agreementStatus = AgreementState::new();
+    agreementStatus.set_party(payload.get_originParty().to_string());
+    agreementStatus.set_status(AgreementStatus_Status::INITIATED);
+    agreement.set_status(agreementStatus);
+
+    state.set_agreement(payload.get_name(), agreement)
+        .map_err(|e| ApplyError::InternalError(format!("Failed to create agreement: {:?}",e)))
+}
+
 pub struct AgreementTransactionHandler {
     family_name: String,
     family_versions: Vec<String>,
@@ -32,8 +160,8 @@ pub struct AgreementTransactionHandler {
 }
 
 impl AgreementTransactionHandler {
-    pub fn new() -> ProgramTransactionHandler {
-        ProgramTransactionHandler {
+    pub fn new() -> AgreementTransactionHandler {
+        AgreementTransactionHandler {
             family_name : "agreement".to_string(),
             family_versions : vec!["0.1".to_string()],
             namespaces : vec![AGREEMENT_NAMESPACE.to_string()],
@@ -58,9 +186,9 @@ impl TransactionHandler for AgreementTransactionHandler {
         request: &TpProcessRequest,
         context: &mut dyn TransactionContext, 
     ) -> Result<(), ApplyError> {
-        let payload = protobuf::parse_from_bytes::<ProgramPayload>(request.get_payload())
-            .map_err(|_| ApplyError::InternalError("Failed to parse payload".into()))?;
-        let mut state = ProgramState::new(context);
+        let payload = protobuf::parse_from_bytes::<AgreementPayload>(request.get_payload())
+            .map_err(|_| ApplyError::InternalError("Failed to parse agreement payload".into()))?;
+        let mut state = AgreementState::new(context);
         #[cfg(not(target_arch = "wasm32"))]
         info!(
             "{:?} {:?} {:?}",
@@ -70,8 +198,8 @@ impl TransactionHandler for AgreementTransactionHandler {
         );
 
         match payload.action {
-            Action::CREATE_PROGRAM => create_program(payload.get_create_program(), &mut state),
-            Action::UPDATE_ORG_STATUS => update_org_state(payload.get_update_org_status(), &mut state),
+            Action::CREATE_AGREEMENT => create_agreement(payload.get_create_agreement(), &mut state),
+            Action::SET_AGREEMENT_STATUS => update_org_state(payload.get_update_org_status(), &mut state),
             _ => Err(ApplyError::InvalidTransaction("Invalid action".into())),
         }
 
