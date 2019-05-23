@@ -63,7 +63,7 @@ impl <'a> AgreementState<'a> {
         }
     }
     pub fn set_agreement(&mut self, name: &str, new_agreement: Agreement) -> Result<(), ApplyError> {
-        let address = compute_agreement_address(gtin);
+        let address = compute_agreement_address(name);
         let d = self.context.get_state_entry(&address);
         let mut agreementList = match d {
             Ok(Some(packed)) => match protobuf::parse_from_bytes(packed.as_slice()) {
@@ -74,7 +74,7 @@ impl <'a> AgreementState<'a> {
                 )))
             }
             },
-            Ok(None) => AgreemenmtList::new(),
+            Ok(None) => AgreementList::new(),
             Err(err) =>{
                 return Err(ApplyError::InternalError(String::from(
                     "Cannot decode the agreement list",
@@ -153,6 +153,37 @@ fn create_agreement(
         .map_err(|e| ApplyError::InternalError(format!("Failed to create agreement: {:?}",e)))
 }
 
+
+fn set_agreement_status(
+    payload: &SetAgreementStatus,
+    state: &mut AgreementState
+) -> Result<(), ApplyError> {
+    let mut agreement = match state.get_agreement(payload.get_name()){
+        Ok(None) => {
+            return Err(ApplyError:: InvalidTransaction(format!(
+                "Agreement does not exists : {}", 
+                payload.get_name(),
+            )))
+        }
+        Ok (Some(agreement)) => agreement,
+        Err(err) => {
+            return Err(ApplyError::InvalidTransaction(format!(
+                "Failed to retrieve state: {}",
+                err,
+            )))
+        }
+    };
+
+    let statuses = agreement.get_agreementStatus().to_vec();
+    let mut agreementStatus = AgreementState::new();
+    agreementStatus.set_party(payload.get_originParty().to_string());
+    agreementStatus.set_status(AgreementStatus_Status::AGREED);
+    agreement.agreementStatus.push(agreementStatus);
+    state.set_agreement(payload.get_name(), agreement)
+        .map_err(|e| ApplyError::InternalError(format!("Failed to update the agreement: {:?}",e)))
+
+}
+
 pub struct AgreementTransactionHandler {
     family_name: String,
     family_versions: Vec<String>,
@@ -199,7 +230,7 @@ impl TransactionHandler for AgreementTransactionHandler {
 
         match payload.action {
             Action::CREATE_AGREEMENT => create_agreement(payload.get_create_agreement(), &mut state),
-            Action::SET_AGREEMENT_STATUS => update_org_state(payload.get_update_org_status(), &mut state),
+            Action::SET_AGREEMENT_STATUS => set_agreement_status(payload.get_set_agreement_status(), &mut state),
             _ => Err(ApplyError::InvalidTransaction("Invalid action".into())),
         }
 
