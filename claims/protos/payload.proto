@@ -8,9 +8,15 @@ message AgreementPayload {
         SET_AGREEMENT_STATUS = 2;
     }
     Action action = 1;
-
     CreateAgreement create_agreement = 2;
     SetAgreementStatus set_agreement_status = 3;
+    string gtin = 4;
+    string unitOfQuantity =5;
+    double price =6;
+    string effectiveDate =7;
+    string terminationDate=8;
+    string paymentTerm =9;
+    string originParty = 10;
 }
 
 message CreateAgreement {
