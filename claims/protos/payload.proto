@@ -1,6 +1,5 @@
 syntax = "proto3";
 import "agreement.proto";
-imnport "agreement_registry.proto";
 
 message AgreementPayload {
     enum Action {
