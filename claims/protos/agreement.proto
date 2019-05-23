@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+message Agreement{
+
+    string gtin = 1;
+    string unitOfQuantity =2;
+    double price =3;
+    string effectiveDate =4;
+    string terminationDate=5;
+    string  paymentTerm =6;
+    string originParty = 7;
+    repeated AgreementStatus agreementStatus =8;
+    string name = 9;
+}
+
+message AgreementStatus{
+
+    enum Status{
+        INITIATED =0;
+        AGREED=1;
+        DISAGREED=2;
+    }
+
+    string party =1 ;
+    Status status =2;
+}
+
+
+message AgreementList {
+  repeated Agreement agreements = 1;
+}
+
