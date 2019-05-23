@@ -137,7 +137,7 @@ fn create_agreement(
     let mut agreement = Agreement::new();
     agreement.set_name(payload.get_name().to_string());
     agreement.set_gtin(payload.get_gtin().to_string());
-    agreement.set_price(payload.get_price();
+    agreement.set_price(payload.get_price());
     agreement.set_effectiveDate(payload.get_effectiveDate().to_string());
     agreement.set_terminationDate(payload.get_terminationDate().to_string());
     agreement.set_unitOfQuantity(payload.get_unitOfQuantity().to_string());
@@ -147,7 +147,7 @@ fn create_agreement(
     let mut agreementStatus = AgreementStatus::new();
     agreementStatus.set_party(payload.get_originParty().to_string());
     agreementStatus.set_status(AgreementStatus_Status::INITIATED);
-    agreement.set_status(agreementStatus);
+    agreement.push(agreementStatus);
 
     state.set_agreement(payload.get_name(), agreement)
         .map_err(|e| ApplyError::InternalError(format!("Failed to create agreement: {:?}",e)))
@@ -176,7 +176,7 @@ fn set_agreement_status(
 
     let statuses = agreement.get_agreementStatus().to_vec();
     let mut agreementStatus = AgreementStatus::new();
-    agreementStatus.set_party(payload.get_originParty().to_string());
+    agreementStatus.set_party(payload.get_party().to_string());
     agreementStatus.set_status(AgreementStatus_Status::AGREED);
     agreement.agreementStatus.push(agreementStatus);
     state.set_agreement(payload.get_name(), agreement)
