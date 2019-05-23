@@ -137,14 +137,14 @@ fn create_agreement(
     let mut agreement = Agreement::new();
     agreement.set_name(payload.get_name().to_string());
     agreement.set_gtin(payload.get_gtin().to_string());
-    agreement.set_price(payload.get_price().to_string());
+    agreement.set_price(payload.get_price();
     agreement.set_effectiveDate(payload.get_effectiveDate().to_string());
-    agreement.set_terminationDate(payload.get_erminationDate().to_string());
+    agreement.set_terminationDate(payload.get_terminationDate().to_string());
     agreement.set_unitOfQuantity(payload.get_unitOfQuantity().to_string());
     agreement.set_paymentTerm(payload.get_paymentTerm().to_string());
     agreement.set_originParty(payload.get_originParty().to_string());
 
-    let mut agreementStatus = AgreementState::new();
+    let mut agreementStatus = AgreementStatus::new();
     agreementStatus.set_party(payload.get_originParty().to_string());
     agreementStatus.set_status(AgreementStatus_Status::INITIATED);
     agreement.set_status(agreementStatus);
@@ -175,7 +175,7 @@ fn set_agreement_status(
     };
 
     let statuses = agreement.get_agreementStatus().to_vec();
-    let mut agreementStatus = AgreementState::new();
+    let mut agreementStatus = AgreementStatus::new();
     agreementStatus.set_party(payload.get_originParty().to_string());
     agreementStatus.set_status(AgreementStatus_Status::AGREED);
     agreement.agreementStatus.push(agreementStatus);
