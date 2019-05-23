@@ -3,7 +3,7 @@ use crypto::digest::Digest;
 use crypto::sha2::Sha512;
 
 use protos::agreement::{Agreement, AgreementStatus, AgreementStatus_Status, AgreementList};
-use protos::payload::{CreateAgreement, UpdateOrgStatus, AgreementPayload, AgreementPayload_Action as Action};
+use protos::payload::{CreateAgreement, SetAgreementStatus, AgreementPayload, AgreementPayload_Action as Action};
 
 
 
@@ -59,13 +59,13 @@ impl <'a> AgreementState<'a> {
                 }
                 Ok (None)
             }
-            None => Ok(None),?:?
+            None => Ok(None),
         }
     }
     pub fn set_agreement(&mut self, name: &str, new_agreement: Agreement) -> Result<(), ApplyError> {
         let address = compute_agreement_address(name);
         let d = self.context.get_state_entry(&address);
-        let mut agreementList = match d {
+        let mut agreement_list = match d {
             Ok(Some(packed)) => match protobuf::parse_from_bytes(packed.as_slice()) {
                 Ok(agreements) => agreements,
                 Err(err) =>{
@@ -116,7 +116,7 @@ impl <'a> AgreementState<'a> {
 }
 
 fn create_agreement(
-    payload: &CreateAgreementAction,
+    payload: &CreateAgreement,
     state: &mut AgreementState
 ) -> Result<(), ApplyError> {
     match state.get_agreement(payload.get_name()) {
