@@ -1,0 +1,11 @@
+[package]
+name = "processor"
+version = "0.1.0"
+authors = ["madushankaf"]
+edition = "2018"
+
+[dependencies]
+
+[[bin]]
+name = "processor"
+path = "main.rs"
