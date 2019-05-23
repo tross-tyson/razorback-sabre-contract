@@ -27,5 +27,5 @@ message CreateAgreement {
 message SetAgreementStatus {
     string name = 1;
     string party = 2;
-    Status status =3;
+    int status =3;
 }
