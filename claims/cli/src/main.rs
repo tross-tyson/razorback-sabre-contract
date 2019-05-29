@@ -1,3 +1,5 @@
+//TODO[Madushanka]: Should include all the operations, currently support only the creation. 
+
 #[macro_use]
 extern crate clap;
 extern crate crypto;
@@ -18,7 +20,6 @@ use hyper::client::{Request, Client};
 use tokio_core::reactor::Core;
 use futures::Stream;
 use json::parse;
-// use rustc_serialize::json;
 mod protos;
 
 use protos::agreement::{ AgreementList};
