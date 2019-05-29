@@ -1,0 +1,32 @@
+syntax = "proto3";
+import "agreement.proto";
+
+message AgreementPayload {
+    enum Action {
+        ACTION_UNSET = 0;
+        CREATE_AGREEMENT = 1;
+        SET_AGREEMENT_STATUS = 2;
+    }
+    Action action = 1;
+    CreateAgreement create_agreement = 2;
+    SetAgreementStatus set_agreement_status = 3;
+    
+}
+
+message CreateAgreement {
+
+    string gtin = 1;
+    string unitOfQuantity =2;
+    double price =3;
+    string effectiveDate =4;
+    string terminationDate=5;
+    string paymentTerm =6;
+    string originParty = 7;
+    string name =8;
+
+}
+message SetAgreementStatus {
+    string name = 1;
+    string party = 2;
+    int32 status =3;
+}
