@@ -27,7 +27,8 @@ message CreatePO {
 
 message ReceivePO {
 
-    string date =1;
-    string party = 2;
+    string poNumber = 1;
+    string date =2;
+    string party = 3;
 
 }
