@@ -169,7 +169,7 @@ fn create_po(
 }
 
 fn receive_po(
-    payload: &CreatePO,
+    payload: &ReceivePO,
     state: &mut POState
 ) -> Result<(), ApplyError> {
 
