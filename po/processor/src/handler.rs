@@ -158,11 +158,11 @@ fn create_po(
     po.set_originParty(payload.get_originParty().to_string());
     for item in payload.get_items(){
         let mut ite = Item::new();
-        ite.set_gtin(item.get_gtin().tostring());
+        ite.set_gtin(item.get_gtin().to_string());
         ite.set_quantity(item.get_quantity());
         ite.set_price(item.get_price());
         ite.set_agreementID(item.get_agreementID().to_string());
-        ite.set_carrierName(item.get_carrierName().tostring());
+        ite.set_carrierName(item.get_carrierName().to_string());
         po.items.push(ite);
     }
     let mut poStatus = POStatus::new();
