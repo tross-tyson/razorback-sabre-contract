@@ -156,9 +156,9 @@ fn create_po(
     po.set_shipDate(payload.get_shipDate().to_string());
     po.set_paymentDate(payload.get_paymentDate().to_string());
     po.set_originParty(payload.get_originParty().to_string());
-  //  for item in payload.get_items(){
-  //      po.items.push(item);
-  //  }
+    for item in payload.get_items(){
+        po.items.push(item);
+    }
     let mut poStatus = POStatus::new();
     poStatus.set_party(payload.get_originParty().to_string());
     poStatus.set_status(POStatus_OrderStatus::ORDERED);
