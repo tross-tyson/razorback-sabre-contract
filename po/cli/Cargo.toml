@@ -1,0 +1,18 @@
+[package]
+name = "po-cli"
+version = "0.1.0"
+build = "build.rs"
+
+[dependencies]
+protobuf = "2"
+clap = "2"
+rust-crypto = "0.2"
+futures = "0.1"
+hyper = "0.11"
+tokio-core = "0.1"
+json = "0.1"
+base64 = "0.1"
+
+[build-dependencies]
+protoc-rust = "2"
+
