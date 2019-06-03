@@ -156,12 +156,12 @@ fn create_po(
     po.set_shipDate(payload.get_shipDate().to_string());
     po.set_paymentDate(payload.get_paymentDate().to_string());
     po.set_originParty(payload.get_originParty().to_string());
-    for item in payload.get_items(){
-        po.items.push(item);
-    }
+  //  for item in payload.get_items(){
+  //      po.items.push(item);
+  //  }
     let mut poStatus = POStatus::new();
     poStatus.set_party(payload.get_originParty().to_string());
-    poStatus.set_status(OrderStatus::ORDERED);
+    poStatus.set_status(POStatus_OrderStatus::ORDERED);
     poStatus.orderStatusHistory.push(poStatus);
 
     state.set_po(payload.get_poNumber(), po)
@@ -192,7 +192,7 @@ fn receive_po(
     let mut poStatus = POStatus::new();
     poStatus.set_party(payload.get_party().to_string());
     poStatus.set_date(payload.get_date().to_string());
-    poStatus.set_orderStatus(POStatus::RECEIVED);
+    poStatus.set_orderStatus(POStatus_OrderStatus::RECEIVED);
     poStatus.orderStatusHistory.push(poStatus);
 
     state.set_po(payload.get_poNumber(), po)
