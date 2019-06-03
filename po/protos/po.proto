@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+message POStatus{
+
+    enum OrderStatus{
+        ORDERED =0;
+        RECEIVED=1;
+        SHIPPED=2;
+    }
+
+    string party =1 ;
+    OrderStatus status =2;
+    string date =3;
+}
+
+message Item
+{
+   
+    string gtin =1;
+    int32 quantity =2;
+    double price =3;
+    string agreementID=4;
+    string carrierName=5;
+}
+
+message PO{
+
+    string poNumber = 1;
+    string poDate =2;
+    repeated Item items =3;
+    double totalAmount =4;
+    string shipDate=5;
+    string paymentDate=6;
+    repeated POStatus orderStatusHistory =7;
+    string originParty = 8;
+}
+
+
+message POList {
+  repeated PO purchaseOrders = 1;
+}
