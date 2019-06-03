@@ -157,7 +157,13 @@ fn create_po(
     po.set_paymentDate(payload.get_paymentDate().to_string());
     po.set_originParty(payload.get_originParty().to_string());
     for item in payload.get_items(){
-        po.items.push(item);
+        let mut ite = Item::new();
+        ite.set_gtin(item.get_gtin().tostring());
+        ite.set_quantity(item.get_quantity());
+        ite.set_price(item.get_price());
+        ite.set_agreementID(item.get_agreementID().to_string());
+        ite.set_carrierName(item.get_carrierName().tostring());
+        po.items.push(ite);
     }
     let mut poStatus = POStatus::new();
     poStatus.set_party(payload.get_originParty().to_string());
