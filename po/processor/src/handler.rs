@@ -192,8 +192,8 @@ fn receive_po(
     let mut poStatus = POStatus::new();
     poStatus.set_party(payload.get_party().to_string());
     poStatus.set_date(payload.get_date().to_string());
-    poStatus.set_orderStatus(POStatus_OrderStatus::RECEIVED);
-    poStatus.orderStatusHistory.push(poStatus);
+    poStatus.set_status(POStatus_OrderStatus::RECEIVED);
+    po.orderStatusHistory.push(poStatus);
 
     state.set_po(payload.get_poNumber(), po)
         .map_err(|e| ApplyError::InternalError(format!("Failed to change the status of the po tp received: {:?}",e)))
