@@ -162,7 +162,7 @@ fn create_po(
     let mut poStatus = POStatus::new();
     poStatus.set_party(payload.get_originParty().to_string());
     poStatus.set_status(POStatus_OrderStatus::ORDERED);
-    poStatus.orderStatusHistory.push(poStatus);
+    po.orderStatusHistory.push(poStatus);
 
     state.set_po(payload.get_poNumber(), po)
         .map_err(|e| ApplyError::InternalError(format!("Failed to create po: {:?}",e)))
@@ -177,7 +177,7 @@ fn receive_po(
         Ok(None) => {
             return Err(ApplyError:: InvalidTransaction(format!(
                 "PO does not exists : {}", 
-                payload.get_name(),
+                payload.get_poNumber(),
             )))
         }
         Ok (Some(po)) => po,
