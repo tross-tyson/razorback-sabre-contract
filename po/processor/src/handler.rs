@@ -17,7 +17,7 @@ use crypto::digest::Digest;
 use crypto::sha2::Sha512;
 
 use protos::po::{PO, Item, POStatus, POStatus_OrderStatus, POList};
-use protos::payload::{CreatePO, EditPO, POPayload, POPayload_Action as Action};
+use protos::payload::{CreatePO, ReceivePO, POPayload, POPayload_Action as Action};
 
 // Encapuslate all the biz logic related to 'Agreements'
 
@@ -139,7 +139,7 @@ fn create_po(
         Ok(Some(_)) => {
             return Err(ApplyError::InvalidTransaction(format!(
                 "PO already exists: {}",
-                payload.get_gtin(),
+                payload.get_poNumber(),
             )))
         }
         Err(err) => {
@@ -155,14 +155,13 @@ fn create_po(
     po.set_totalAmount(payload.get_totalAmount());
     po.set_shipDate(payload.get_shipDate().to_string());
     po.set_paymentDate(payload.get_paymentDate().to_string());
-    po.set_unitOfQuantity(payload.get_unitOfQuantity().to_string());
     po.set_originParty(payload.get_originParty().to_string());
     for item in payload.get_items(){
         po.items.push(item);
     }
     let mut poStatus = POStatus::new();
-    poStatus.set_party(payload.get_party().to_string());
-    poStatus.set_status(POStatus::ORDERED);
+    poStatus.set_party(payload.get_originParty().to_string());
+    poStatus.set_status(OrderStatus::ORDERED);
     poStatus.orderStatusHistory.push(poStatus);
 
     state.set_po(payload.get_poNumber(), po)
@@ -248,7 +247,7 @@ impl TransactionHandler for POTransactionHandler {
 
         match payload.action {
             Action::CREATE_PO => create_po(payload.get_create_po(), &mut state),
-            Action::RECEIVE_PO => receive_po(payload.get_receivepo(), &mut state),
+            Action::RECEIVE_PO => receive_po(payload.get_receive_po(), &mut state),
             _ => Err(ApplyError::InvalidTransaction("Invalid action".into())),
         }
 
